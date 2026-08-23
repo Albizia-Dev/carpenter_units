@@ -1,0 +1,26 @@
+name: carpenter_units
+description: Cascading relative units for Flutter.
+version: 0.1.0
+
+repository: https://github.com/Albizia-Dev/carpenter_units
+issue_tracker: https://github.com/Albizia-Dev/carpenter_units/issues
+
+topics:
+  - flutter
+  - units
+  - design-system
+  - responsive
+  - typography
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
