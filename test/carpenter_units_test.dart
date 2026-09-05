@@ -179,6 +179,29 @@ void main() {
 
     expect(find.text('14.0'), findsOneWidget);
   });
+
+  testWidgets('consumer churn preserves later cascade invalidation', (
+    tester,
+  ) async {
+    final key = GlobalKey<_ChurnHostState>();
+
+    await tester.pumpWidget(
+      UnitsRoot(rem: 16.px, child: _ChurnHost(key: key, count: 400)),
+    );
+    expect(find.text('16.0'), findsOneWidget);
+
+    key.currentState!.replaceConsumers(0);
+    await tester.pump();
+
+    key.currentState!.replaceConsumers(200);
+    await tester.pump();
+
+    key.currentState!.setLocalEm(14.px);
+    await tester.pump();
+
+    expect(find.text('14.0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _Host extends StatefulWidget {
@@ -234,5 +257,51 @@ class _ImperativeHostState extends State<_ImperativeHost> {
   @override
   Widget build(BuildContext context) {
     return const _ConstConsumer();
+  }
+}
+
+class _ChurnHost extends StatefulWidget {
+  const _ChurnHost({super.key, required this.count});
+
+  final int count;
+
+  @override
+  State<_ChurnHost> createState() => _ChurnHostState();
+}
+
+class _ChurnHostState extends State<_ChurnHost> {
+  late int _count = widget.count;
+  var _generation = 0;
+
+  void replaceConsumers(int count) {
+    setState(() {
+      _count = count;
+      _generation += 1;
+    });
+  }
+
+  void setLocalEm(Unit value) {
+    context.units.set(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const _ConstConsumer(),
+        for (var index = 0; index < _count; index++)
+          _UnitProbe(key: ValueKey('$_generation-$index')),
+      ],
+    );
+  }
+}
+
+class _UnitProbe extends StatelessWidget {
+  const _UnitProbe({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    context.units(1.em);
+    return const SizedBox.shrink();
   }
 }
