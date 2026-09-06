@@ -182,8 +182,11 @@ final class _NodeState {
 }
 
 final class _UnitsEngine {
+  static const int _minimumConsumerCompactionSlack = 256;
+
   final Expando<_NodeState> _nodes = Expando<_NodeState>('carpenter_units');
   final List<WeakReference<Element>> _consumers = <WeakReference<Element>>[];
+  int _nextConsumerCompactionAt = _minimumConsumerCompactionSlack;
 
   _NodeState _node(Element element) => _nodes[element] ??= _NodeState();
 
@@ -289,6 +292,25 @@ final class _UnitsEngine {
     }
     state.registeredConsumer = true;
     _consumers.add(WeakReference<Element>(consumer));
+    _compactConsumersIfNeeded();
+  }
+
+  void _compactConsumersIfNeeded() {
+    if (_consumers.length < _nextConsumerCompactionAt) {
+      return;
+    }
+
+    _consumers.removeWhere((reference) {
+      final consumer = reference.target;
+      return consumer == null || !consumer.mounted;
+    });
+
+    final liveCount = _consumers.length;
+    final proportionalSlack = liveCount ~/ 2;
+    final slack = proportionalSlack < _minimumConsumerCompactionSlack
+        ? _minimumConsumerCompactionSlack
+        : proportionalSlack;
+    _nextConsumerCompactionAt = liveCount + slack;
   }
 
   void _registerDependent(Element owner, Element consumer) {
