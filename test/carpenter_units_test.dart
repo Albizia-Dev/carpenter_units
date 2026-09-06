@@ -186,7 +186,10 @@ void main() {
     final key = GlobalKey<_ChurnHostState>();
 
     await tester.pumpWidget(
-      UnitsRoot(rem: 16.px, child: _ChurnHost(key: key, count: 400)),
+      UnitsRoot(
+        rem: 16.px,
+        child: _ChurnHost(key: key, count: 400),
+      ),
     );
     expect(find.text('16.0'), findsOneWidget);
 
