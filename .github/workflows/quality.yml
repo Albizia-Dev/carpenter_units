@@ -39,6 +39,7 @@ jobs:
         shell: bash
         run: |
           git restore analysis_options.yaml 2>/dev/null || true
+          git restore example/analysis_options.yaml 2>/dev/null || true
           git restore example/pubspec.lock 2>/dev/null || true
 
       - name: Guard scope
